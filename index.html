@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8" />
+  <title>Bus Demo 6 — KMB + CTB/NWFB 即時</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+  <header>
+    <div class="title">
+      <h1>🚌 Bus Demo 6 — 九巴 + 城巴 / 新巴</h1>
+      <div id="clock" class="clock"></div>
+    </div>
+
+    <div class="controls">
+      <select id="companySelect" title="選公司">
+        <option value="all">所有公司</option>
+        <option value="kmb">九巴 (KMB)</option>
+        <option value="ctb">城巴 (CTB)</option>
+        <option value="nwfb">新巴 (NWFB)</option>
+      </select>
+
+      <select id="routeSelect" title="選路線">
+        <option value="all">所有路線</option>
+      </select>
+
+      <button id="dirBtn" title="切換方向">切換方向</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <h2>站點 / ETA（中 / EN）</h2>
+      <ul id="stopList"></ul>
+    </aside>
+
+    <main id="main">
+      <div id="map"></div>
+    </main>
+  </div>
+
+  <footer>
+    <small>資料來源：Data.gov.hk / etabus / rt.data.gov.hk。註：九巴提供真實 GPS；城巴/新巴主要提供 ETA（若顯示為「估算」，表示位置為 ETA 推估，不代表真實 GPS）。</small>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
