@@ -316,3 +316,60 @@ async function fetchJSON(url){
   }
   return res.json();
 }
+// 儲存 marker 狀態
+let busMarkers = {}; // { plate: { marker, lat, lng } }
+
+// 插值移動 function
+function animateMarker(marker, fromLatLng, toLatLng, duration = 5000) {
+  const start = performance.now();
+
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const lat = fromLatLng.lat + (toLatLng.lat - fromLatLng.lat) * progress;
+    const lng = fromLatLng.lng + (toLatLng.lng - fromLatLng.lng) * progress;
+
+    marker.setLatLng([lat, lng]);
+
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// 更新巴士位置（每 5 秒）
+async function loadBusPositions() {
+  try {
+    const res = await fetch("https://data.etabus.gov.hk/v1/transport/kmb/vehicle");
+    const data = await res.json();
+    const buses = data.data;
+
+    buses.forEach(bus => {
+      const plate = bus.plate;
+      const newLatLng = { lat: parseFloat(bus.lat), lng: parseFloat(bus.long) };
+
+      if (busMarkers[plate]) {
+        // 已有 marker → 平滑郁去新位置
+        animateMarker(busMarkers[plate].marker, busMarkers[plate], newLatLng, 5000);
+        busMarkers[plate].lat = newLatLng.lat;
+        busMarkers[plate].lng = newLatLng.lng;
+      } else {
+        // 未有 → 新增 marker
+        const marker = L.marker([newLatLng.lat, newLatLng.lng], {
+          icon: L.divIcon({
+            className: "bus-icon",
+            html: "🚌",
+            iconSize: [30, 30]
+          })
+        }).addTo(map);
+
+        marker.bindPopup(`路線 ${bus.route}<br>車牌: ${plate}`);
+        busMarkers[plate] = { marker, ...newLatLng };
+      }
+    });
+  } catch (err) {
+    console.error("載入巴士位置失敗:", err);
+  }
+}
+
+// 每 5 秒更新 API
+setInterval(loadBusPositions, 5000);
+loadBusPositions();
