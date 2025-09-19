@@ -373,3 +373,32 @@ async function loadBusPositions() {
 // 每 5 秒更新 API
 setInterval(loadBusPositions, 5000);
 loadBusPositions();
+let busMarkers = {};
+
+async function updateBuses() {
+  try {
+    let res = await fetch("https://data.etabus.gov.hk/v1/transport/kmb/vehicle-position");
+    let data = await res.json();
+
+    // 清除舊 marker
+    Object.values(busMarkers).forEach(m => map.removeLayer(m));
+    busMarkers = {};
+
+    data.data.forEach(bus => {
+      let lat = bus.lat;
+      let long = bus.long;
+      let plate = bus.plate;
+
+      let marker = L.marker([lat, long]).addTo(map)
+        .bindPopup(`車牌: ${plate}<br>路線: ${bus.route}`);
+      busMarkers[plate] = marker;
+    });
+  } catch (err) {
+    console.error("更新巴士位置失敗: ", err);
+  }
+}
+
+// 每 5 秒更新一次
+setInterval(updateBuses, 5000);
+updateBuses();
+
